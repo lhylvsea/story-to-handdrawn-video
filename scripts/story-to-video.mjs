@@ -41,6 +41,35 @@ const sourceText = args.input
   : String(args.text);
 const title = String(args.title || '手绘故事');
 const selectedStyle = resolveStyle(root, args.style);
+const characterProfileId = args['character-profile']
+  ? String(args['character-profile']).trim()
+  : null;
+let characterProfile = null;
+if (characterProfileId) {
+  if (!/^[a-z0-9-]+$/i.test(characterProfileId)) {
+    throw new Error('--character-profile must be a registered profile id');
+  }
+  const profilePath = resolve(
+    root,
+    'references/character-profiles',
+    `${characterProfileId}.json`,
+  );
+  if (!existsSync(profilePath)) {
+    throw new Error(`Unknown character profile "${characterProfileId}": ${profilePath}`);
+  }
+  characterProfile = JSON.parse(readFileSync(profilePath, 'utf8'));
+}
+const customCharacterReference = args['character-reference']
+  ? resolve(root, String(args['character-reference']))
+  : null;
+if (customCharacterReference && !existsSync(customCharacterReference)) {
+  throw new Error(`Custom character reference not found: ${customCharacterReference}`);
+}
+if (characterProfile?.requires_reference && !customCharacterReference) {
+  throw new Error(
+    `Character profile "${characterProfileId}" requires --character-reference; use the user's uploaded prototype image.`,
+  );
+}
 const styleReferencePaths = selectedStyle.references.map(
   (reference) => reference.absolute_path,
 );
@@ -216,8 +245,15 @@ for (const path of styleReferencePaths) {
 const styleVersion = styleFingerprint.digest('hex').slice(0, 16);
 const characterLock = String(
   args['character-lock'] ||
+    characterProfile?.character_lock ||
     '重复出现的主角须保持同一张脸、发型、年龄、服装配色和身体比例；具体人物身份以故事原文为准；不得添加原文未提及的配角、道具或文字',
 );
+const characterReferenceInstruction = customCharacterReference
+  ? String(
+      characterProfile?.reference_instruction ||
+        '将用户上传的角色原型图作为主要身份参考；保留用户指定人物的脸部特征、发型、年龄、体态、服装和可复用的角色伙伴；忽略背景、临时姿势、界面文字和与角色无关的道具。',
+    )
+  : '';
 
 const storyParts = splitStory(sourceText);
 if (storyParts.length === 0) throw new Error('No usable story sentences found');
@@ -235,11 +271,16 @@ const hashInput = [
   textMode,
   transition,
   transitionSec,
+  characterProfileId || '',
   characterLock,
   JSON.stringify(visualPlan),
   sourceText,
 ].join('\n');
-const storyHash = createHash('sha256').update(hashInput).digest('hex').slice(0, 8);
+const storyFingerprint = createHash('sha256').update(hashInput);
+if (customCharacterReference) {
+  storyFingerprint.update(readFileSync(customCharacterReference));
+}
+const storyHash = storyFingerprint.digest('hex').slice(0, 8);
 const assetSet = `${safeTitle}-${storyHash}`;
 
 const generatedRoot = generator === 'codex' ? `generated/codex/${assetSet}` : 'generated/auto';
@@ -338,8 +379,8 @@ let previousColor = null;
 const scenes = [];
 const codexJobs = [];
 
-let codexCharacterReference = null;
-if (generator === 'codex') {
+let codexCharacterReference = customCharacterReference;
+if (generator === 'codex' && !customCharacterReference) {
   codexCharacterReference = absoluteAsset('00_character_reference.png');
   const characterPrompt = writePrompt(
     '00_character_reference.txt',
@@ -389,11 +430,15 @@ ${selectedStyle.caption_prompt} Use 1–3 large readable lines with generous 48-
     ? 'Illustration panel (pixels y=512–1536): use this exact lower 1024×1024 square for the scene. Leave the 342–512 transition band completely white.'
     : 'Use the entire 1024×1024 square for the scene.';
 
-  const hasContinuityReference = Boolean(previousColor) || Boolean(codexCharacterReference);
+  const hasContinuityReference =
+    Boolean(previousColor) || Boolean(customCharacterReference) || Boolean(codexCharacterReference);
+  const customCharacterReferenceNote = customCharacterReference
+    ? `Custom character reference: the supplied user image is the primary identity source. ${characterReferenceInstruction} If the written lock conflicts with visible prototype details, preserve the uploaded prototype unless the user explicitly requests a change.`
+    : '';
   const sceneReferenceBrief = fixedReferenceLegend
-    ? `Input images: ${fixedReferenceLegend}${hasContinuityReference ? '; any later image is an identity or continuity reference' : ''}. Use the fixed style images only for drawing language, texture, palette, page rhythm and finish. Ignore their depicted people, actions, objects and text.`
+    ? `Input images: ${fixedReferenceLegend}${hasContinuityReference ? '; any later image is an identity or continuity reference' : ''}. Use the fixed style images only for drawing language, texture, palette, page rhythm and finish. Ignore their depicted people, actions, objects and text. ${customCharacterReferenceNote}`
     : hasContinuityReference
-      ? `Input images: every supplied image is an identity or continuity reference. Preserve identity and useful continuity, but follow the written "${selectedStyle.name_zh}" style profile rather than copying an earlier composition.`
+      ? `Input images: every supplied image is an identity or continuity reference. Preserve identity and useful continuity, but follow the written "${selectedStyle.name_zh}" style profile rather than copying an earlier composition. ${customCharacterReferenceNote}`
       : `Input images: none. Follow the written "${selectedStyle.name_zh}" style profile exactly.`;
   const masterPrompt = writePrompt(
     `${id}_master.txt`,
@@ -404,6 +449,7 @@ Narrative sentence to illustrate: "${text}"
 Scene direction: ${visualDirection}
 Create one concrete, immediately readable tableau for that sentence. Use the locked recurring protagonists whenever the current sentence requires them.
 Character lock: ${characterLock}
+${customCharacterReferenceNote}
 Style: ${styleLock}
 ${captionPanel}
 ${illustrationPanel}
@@ -418,6 +464,7 @@ Constraints: non-graphic, emotionally restrained storytelling; no blood, wounds,
     runImage2({
       images: [
         ...styleReferencePaths,
+        ...(customCharacterReference ? [customCharacterReference] : []),
         ...(previousColor ? [previousColor] : []),
       ],
       promptFile: masterPrompt,
@@ -486,7 +533,7 @@ Constraints: non-graphic, emotionally restrained storytelling; no blood, wounds,
   if (generator === 'codex') {
     const codexSceneReferences = [
       ...styleReferencePaths,
-      codexCharacterReference,
+      ...(customCharacterReference ? [customCharacterReference] : [codexCharacterReference]),
     ];
     codexJobs.push({
       id,
@@ -569,6 +616,13 @@ if (generator === 'codex') {
         style_profile: selectedStyle.profile_path || selectedStyle.library_path,
         style_fingerprint: styleVersion,
         style_references: styleReferencePaths,
+        character_profile: characterProfileId,
+        character_lock: characterLock,
+        character_reference: {
+          source: customCharacterReference ? 'user-uploaded' : 'generated',
+          path: codexCharacterReference,
+          instruction: characterReferenceInstruction || null,
+        },
         asset_set: assetSet,
         storyboard: outputPath,
         text_mode: textMode,

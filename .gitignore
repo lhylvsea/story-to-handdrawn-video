@@ -14,3 +14,5 @@ uploaded-pages.json
 *.zip
 .DS_Store
 .npm-cache/
+__pycache__/
+*.py[cod]

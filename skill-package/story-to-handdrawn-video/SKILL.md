@@ -1,6 +1,6 @@
 ---
 name: story-to-handdrawn-video
-description: Convert Chinese story copy or ordered local images into a silent hand-drawn Remotion story video. Supports a locked user-approved colored-pencil diary default plus a built-in 20-style library covering doodle, crayon, line explainer, ink, watercolor, gouache, storybook, zine, whiteboard, and printmaking looks. Use when the user asks to generate, import, restyle, preview, or render a hand-drawn story video, asks for the bundled diary-comic look, or wants to choose and compare hand-drawn visual styles.
+description: Convert Chinese story copy, article-derived drafts, ordered local images, or user-uploaded character IP references into a silent hand-drawn Remotion story video. Supports a locked user-approved colored-pencil diary default, a built-in 20-style library, custom character-reference images, the 海洋哥 IP profile, and a required source-to-draft review gate for article content. Use when the user asks to extract an article into video copy, review or diff that copy, use an uploaded character prototype, use the 海洋哥 IP, generate, import, restyle, preview, or render a hand-drawn story video.
 ---
 
 # Story to Hand-drawn Video
@@ -17,6 +17,71 @@ Use the project renderer through this Skill's `scripts/run_story_video.py`. Set 
 6. Keep all illustration marks inside the white safe border. Use contained framing and never `cover` cropping.
 7. Produce a silent MP4. Voiceover and optional BGM are post-production tasks.
 8. Report the scene count, duration, output path, and whether the result is plan-only, preview, or final.
+
+## Custom character IP references
+
+When the user uploads a character prototype and says to use it as the IP, pass that image through `--character-reference`. The image is an identity reference, not a scene background: preserve the user-designated person's face, hair, age, body proportions, wardrobe, and any explicitly requested companion character; ignore unrelated background, temporary pose, interface text, and incidental props. If the user supplies a written lock that conflicts with visible prototype details, the uploaded prototype wins unless the user explicitly asks for the change.
+
+For the user's named IP, “海洋哥” or “海洋叔叔”, use the registered profile and the uploaded prototype image together:
+
+```bash
+python3 scripts/run_story_video.py \
+  --input /absolute/story.txt \
+  --character-profile haiyangge \
+  --character-reference /absolute/uploaded-character-prototype.png \
+  --mode generate
+```
+
+The `haiyangge` profile applies this lock: `固定IP：海洋叔叔，圆脸、短黑发、蓝色工装、棕色皮鞋；所有场景保持脸型、发型、服装和身体比例一致。` The uploaded prototype remains the primary visual source and is required; do not synthesize the named IP from text alone when no prototype image is available.
+
+For any other custom IP, use `--character-reference` with an optional `--character-lock`:
+
+```bash
+python3 scripts/run_story_video.py \
+  --input /absolute/story.txt \
+  --character-reference /absolute/custom-character.png \
+  --character-lock "固定IP：保留上传原型中的脸型、发型、服装和体态；所有场景保持一致。" \
+  --mode generate
+```
+
+The reference is included in every Codex Image2 scene job and in the API fallback's image references. Changing the reference image changes the generated asset fingerprint, so stale images are not silently reused. The uploaded image is read from the user's local path and is not copied into the public repository.
+
+Typical user requests that should trigger this path:
+
+- “以我上传的这张人物图为指定 IP，把这篇政策文章做成手绘解读视频。”
+- “以海洋哥 IP 形象制作这期设备管理培训短片，原型图以我上传的图片为准。”
+- “用我上传的工程师角色原型，把这套生产线安全操作流程做成连续手绘动画。”
+- “用我上传的品牌吉祥物和主人物形象，把产品故事做成可后期配音的手绘视频。”
+
+## Article-content review gate
+
+When the input comes from an article URL or other source material, stop after content extraction and obtain explicit user approval before generating images, narration, or a final video.
+
+1. Save a UTF-8 source snapshot and the proposed video copy as separate text files. Preserve names, dates, figures, quotations, policy terms, and logical relationships; mark any inference.
+2. Run the deterministic review command:
+
+   ```bash
+   python3 scripts/run_story_video.py \
+     --mode review \
+     --source /absolute/article-source.txt \
+     --input /absolute/story-draft.txt \
+     --review-dir /absolute/story-review
+   ```
+
+   This writes `story-review.md`, `story-review.diff`, and `story-review.json`. The diff compares source units with proposed video beats and is a review aid, not a substitute for factual checking.
+3. Show the report and diff to the user, then pause. Accept edits to `story-draft.txt`; rerun review whenever the draft changes.
+4. After the user explicitly confirms the current wording, create the approval record:
+
+   ```bash
+   python3 scripts/run_story_video.py \
+     --mode approve \
+     --input /absolute/story-draft.txt \
+     --review-manifest /absolute/story-review/story-review.json
+   ```
+
+5. Pass the resulting `story-review.approval.json` to `--approved-review` for `generate` or `full`. The hash check must pass before generation. Never reuse an approval record after editing the draft.
+
+For direct user-supplied story text that is not derived from an article, `--mode plan` remains available; still pause for approval whenever the user asks to review the copy first.
 
 ## Default visual lock
 
