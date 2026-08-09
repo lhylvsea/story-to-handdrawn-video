@@ -46,6 +46,13 @@ python3 scripts/run_story_video.py \
 
 The reference is included in every Codex Image2 scene job and in the API fallback's image references. Changing the reference image changes the generated asset fingerprint, so stale images are not silently reused. The uploaded image is read from the user's local path and is not copied into the public repository.
 
+Typical user requests that should trigger this path:
+
+- “以我上传的这张人物图为指定 IP，把这篇政策文章做成手绘解读视频。”
+- “以海洋哥 IP 形象制作这期设备管理培训短片，原型图以我上传的图片为准。”
+- “用我上传的工程师角色原型，把这套生产线安全操作流程做成连续手绘动画。”
+- “用我上传的品牌吉祥物和主人物形象，把产品故事做成可后期配音的手绘视频。”
+
 ## Article-content review gate
 
 When the input comes from an article URL or other source material, stop after content extraction and obtain explicit user approval before generating images, narration, or a final video.
