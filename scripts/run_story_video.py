@@ -49,10 +49,40 @@ def parse_args() -> argparse.Namespace:
         help="Print the built-in style catalog and exit",
     )
     parser.add_argument("--character-lock")
+    parser.add_argument(
+        "--character-profile",
+        help="Registered character IP profile, such as haiyangge",
+    )
+    parser.add_argument(
+        "--character-reference",
+        type=Path,
+        help="User-uploaded character prototype image used as an identity reference",
+    )
     parser.add_argument("--visual-plan", type=Path)
     parser.add_argument(
+        "--source",
+        type=Path,
+        help="Raw source text file for article-content review mode",
+    )
+    parser.add_argument(
+        "--review-dir",
+        type=Path,
+        default=Path("review"),
+        help="Directory for the review report, diff, and manifest",
+    )
+    parser.add_argument(
+        "--review-manifest",
+        type=Path,
+        help="Pending review manifest used by approve mode",
+    )
+    parser.add_argument(
+        "--approved-review",
+        type=Path,
+        help="Approval record to validate before generation",
+    )
+    parser.add_argument(
         "--mode",
-        choices=("plan", "generate", "full", "import", "render", "preview"),
+        choices=("plan", "review", "approve", "generate", "full", "import", "render", "preview"),
         default="plan",
     )
     parser.add_argument("--generator", choices=("codex", "api"), default="codex")
@@ -89,19 +119,67 @@ def run(command: list[str], project: Path) -> None:
     subprocess.run(command, cwd=project, check=True)
 
 
+NPM = "npm.cmd" if os.name == "nt" else "npm"
+NODE = "node.exe" if os.name == "nt" else "node"
+
+
+def resolve_project_path(path: Path, project: Path) -> Path:
+    if path.is_absolute():
+        return path.expanduser().resolve()
+    return (project / path).expanduser().resolve()
+
+
 def main() -> None:
     args = parse_args()
     project = args.project_dir.expanduser().resolve()
     require_project(project)
 
     if args.list_styles:
-        run(["npm", "run", "styles"], project)
+        run([NPM, "run", "styles"], project)
+        return
+
+    if args.mode == "review":
+        if args.images or not args.input or not args.source:
+            raise SystemExit("--mode review requires --source and --input draft text files")
+        run(
+            [
+                NODE,
+                "scripts/review-story.mjs",
+                "--mode",
+                "create",
+                "--source",
+                str(resolve_project_path(args.source, project)),
+                "--draft",
+                str(resolve_project_path(args.input, project)),
+                "--output",
+                str(resolve_project_path(args.review_dir, project)),
+            ],
+            project,
+        )
+        return
+
+    if args.mode == "approve":
+        if args.images or not args.input or not args.review_manifest:
+            raise SystemExit("--mode approve requires --input and --review-manifest")
+        run(
+            [
+                NODE,
+                "scripts/review-story.mjs",
+                "--mode",
+                "approve",
+                "--manifest",
+                str(resolve_project_path(args.review_manifest, project)),
+                "--draft",
+                str(resolve_project_path(args.input, project)),
+            ],
+            project,
+        )
         return
 
     if args.images:
         if args.mode == "import":
             raise SystemExit("--mode import is reserved for Codex Image2 manifests")
-        command = ["npm", "run", "import:uploaded", "--"]
+        command = [NPM, "run", "import:uploaded", "--"]
         for image in args.images:
             command += ["--image", str(image.expanduser().resolve())]
         command += [
@@ -120,10 +198,10 @@ def main() -> None:
             command += ["--split-y", split_y]
         run(command, project)
         if args.mode in {"full", "render"}:
-            run(["npm", "run", "render:uploaded"], project)
+            run([NPM, "run", "render:uploaded"], project)
             print(f"Rendered uploaded-image video: {project / 'out/uploaded_picture_silent.mp4'}")
         elif args.mode == "preview":
-            run(["npm", "run", "render:uploaded:preview"], project)
+            run([NPM, "run", "render:uploaded:preview"], project)
             print(
                 f"Rendered uploaded-image preview: "
                 f"{project / 'out/uploaded_picture_silent-preview.mp4'}"
@@ -133,7 +211,7 @@ def main() -> None:
         return
 
     if args.mode in {"render", "preview"}:
-        run(["npm", "run", "render" if args.mode == "render" else "render:preview"], project)
+        run([NPM, "run", "render" if args.mode == "render" else "render:preview"], project)
         output = project / "out" / (
             "picture_silent.mp4" if args.mode == "render" else "picture_silent-preview.mp4"
         )
@@ -141,7 +219,7 @@ def main() -> None:
         return
 
     if args.mode == "import":
-        command = ["npm", "run", "import:codex", "--", "--apply"]
+        command = [NPM, "run", "import:codex", "--", "--apply"]
         if args.manifest:
             command += ["--manifest", str(args.manifest.expanduser().resolve())]
         run(command, project)
@@ -159,7 +237,24 @@ def main() -> None:
     ):
         raise SystemExit("OPENAI_API_KEY is required only for --generator api")
 
-    command = ["npm", "run", "story", "--"]
+    if args.approved_review:
+        if not args.input or args.mode not in {"generate", "full"}:
+            raise SystemExit("--approved-review requires --input and --mode generate or full")
+        run(
+            [
+                NODE,
+                "scripts/review-story.mjs",
+                "--mode",
+                "check",
+                "--approval",
+                str(resolve_project_path(args.approved_review, project)),
+                "--draft",
+                str(resolve_project_path(args.input, project)),
+            ],
+            project,
+        )
+
+    command = [NPM, "run", "story", "--"]
     if args.input:
         command += ["--input", str(args.input.expanduser().resolve())]
     else:
@@ -180,6 +275,13 @@ def main() -> None:
     ]
     if args.character_lock:
         command += ["--character-lock", args.character_lock]
+    if args.character_profile:
+        command += ["--character-profile", args.character_profile]
+    if args.character_reference:
+        command += [
+            "--character-reference",
+            str(resolve_project_path(args.character_reference, project)),
+        ]
     if args.visual_plan:
         command += ["--visual-plan", str(args.visual_plan.expanduser().resolve())]
     if args.manifest:

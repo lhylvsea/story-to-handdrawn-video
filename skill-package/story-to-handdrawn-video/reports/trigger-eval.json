@@ -1,0 +1,192 @@
+{
+  "ok": true,
+  "threshold": 0.34,
+  "description_concepts": [
+    "character_ip",
+    "handdrawn_video",
+    "story_input",
+    "subtitle_policy",
+    "voiceover"
+  ],
+  "missing_description_concepts": [],
+  "summary": {
+    "total": 13,
+    "passed": 13,
+    "false_positive": 0,
+    "false_negative": 0,
+    "pass_rate": 1.0
+  },
+  "failures": [],
+  "results": {
+    "should_trigger": [
+      {
+        "prompt": "把这段中文故事做成 3:4 手绘配音视频，不要底部字幕。",
+        "family": "story_voiceover_no_subtitle",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.8,
+        "matched_concepts": [
+          "handdrawn_video",
+          "story_input",
+          "subtitle_policy",
+          "voiceover"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "用我上传的角色原型制作海洋哥 IP 手绘动画，配音按 1.2 倍。",
+        "family": "custom_ip_voiceover",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.8,
+        "matched_concepts": [
+          "character_ip",
+          "handdrawn_video",
+          "story_input",
+          "voiceover"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "文章先提炼成视频文案并输出 diff，确认后再生成手绘成片。",
+        "family": "article_review_gate",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.4,
+        "matched_concepts": [
+          "handdrawn_video",
+          "story_input"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "把有序图片导入 Remotion 手绘故事动画，最后生成无字幕 MP4。",
+        "family": "ordered_images",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.6,
+        "matched_concepts": [
+          "handdrawn_video",
+          "story_input",
+          "subtitle_policy"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "请给这段培训文案制作旁白版手绘视频，SRT 只有我明确要求时才生成。",
+        "family": "voiceover_subtitle_policy",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.8,
+        "matched_concepts": [
+          "handdrawn_video",
+          "story_input",
+          "subtitle_policy",
+          "voiceover"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "选择水墨风，把这个故事和人物 IP 做成可继续编辑的手绘视频。",
+        "family": "style_and_character",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.6,
+        "matched_concepts": [
+          "character_ip",
+          "handdrawn_video",
+          "story_input"
+        ],
+        "negative_pattern": null
+      }
+    ],
+    "should_not_trigger": [
+      {
+        "prompt": "把这篇文章只翻译成英文。",
+        "family": "translation_only",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.2,
+        "matched_concepts": [
+          "story_input"
+        ],
+        "negative_pattern": "只翻译"
+      },
+      {
+        "prompt": "只解释一下 Remotion 是什么。",
+        "family": "explanation_only",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.2,
+        "matched_concepts": [
+          "handdrawn_video"
+        ],
+        "negative_pattern": "只解释"
+      },
+      {
+        "prompt": "帮我写一个普通 PPT 标题。",
+        "family": "copywriting_only",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.0,
+        "matched_concepts": [],
+        "negative_pattern": "普通 PPT"
+      },
+      {
+        "prompt": "帮我整理一个普通表格。",
+        "family": "spreadsheet_only",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.0,
+        "matched_concepts": [],
+        "negative_pattern": "普通表格"
+      }
+    ],
+    "near_neighbor": [
+      {
+        "prompt": "帮我把现有视频单独提取音频。",
+        "family": "audio_extract_only",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.0,
+        "matched_concepts": [],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "只检查这段文案的错别字，不要做视频。",
+        "family": "copy_review_only",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.2,
+        "matched_concepts": [
+          "story_input"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "只生成一个人物 PNG，不需要动画。",
+        "family": "image_only",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.2,
+        "matched_concepts": [
+          "character_ip"
+        ],
+        "negative_pattern": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "description": "Runtime output checks for the default voiceover postprocessor.",
+  "cases": [
+    {
+      "name": "default_voiceover",
+      "command_contract": "postprocess_voiceover.py --storyboard ... --video ... --output ...",
+      "expected": {
+        "speed": 1.2,
+        "subtitle_mode": "none",
+        "mp4_streams": ["video", "audio"],
+        "subtitle_stream_count": 0,
+        "external_subtitle_file": false
+      }
+    },
+    {
+      "name": "explicit_external_srt",
+      "command_contract": "postprocess_voiceover.py ... --subtitle-mode srt",
+      "expected": {
+        "speed": 1.2,
+        "subtitle_mode": "srt",
+        "mp4_subtitle_stream_count": 0,
+        "external_subtitle_file": true
+      }
+    }
+  ],
+  "missing_evidence": [
+    "provider-backed TTS quality comparison",
+    "cross-platform clean installation",
+    "human listening review"
+  ]
+}

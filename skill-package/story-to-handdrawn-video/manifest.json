@@ -1,0 +1,43 @@
+{
+  "name": "story-to-handdrawn-video",
+  "version": "1.2.0",
+  "owner": "lhylvsea",
+  "updated_at": "2026-08-09",
+  "status": "active",
+  "maturity_tier": "governed",
+  "lifecycle_stage": "library",
+  "context_budget_tier": "production",
+  "review_cadence": "quarterly",
+  "upstream_inspiration": "https://github.com/gnipbao/story-to-handdrawn-video",
+  "target_platforms": [
+    "openai",
+    "claude",
+    "generic",
+    "agent-skills-compatible",
+    "vscode"
+  ],
+  "release_gates": [
+    "validate_skill",
+    "trigger_eval",
+    "skill_ir_export",
+    "prior_art_report",
+    "secret_scan",
+    "git_diff_check",
+    "feature_branch",
+    "voiceover_contract",
+    "subtitle_stream_exclusion",
+    "clean_install"
+  ],
+  "quality_boundaries": {
+    "default_style": "colored-pencil-diary",
+    "base_video_codec": "H.264",
+    "base_video_audio": "silent",
+    "voiceover_default_speed": 1.2,
+    "voiceover_default_subtitle_mode": "none",
+    "subtitle_stream_by_default": false,
+    "subtitle_artifact_by_default": false,
+    "character_reference_policy": "uploaded prototype is primary identity source",
+    "article_content_requires_review": true
+  },
+  "license": "MIT"
+}

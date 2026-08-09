@@ -1,4 +1,4 @@
 interface:
   display_name: "故事转手绘动画"
-  short_description: "把中文故事或有序图片转换成 20 种风格的静音手绘动画"
-  default_prompt: "使用 $story-to-handdrawn-video 从内置 20 种风格中选择最适合的一种，把这段故事生成静音手绘动画。"
+  short_description: "支持文章 diff、自定义角色 IP 和 1.2 倍速无字幕配音版"
+  default_prompt: "使用 $story-to-handdrawn-video；文章内容先提炼并输出可审阅 diff，用户上传角色原型时按原图锁定 IP，提到海洋哥时使用海洋哥 profile，确认后再生成手绘动画。用户要求配音版时默认同步加速约 1.2 倍，输出不含底部字幕流的 MP4，只有明确要求时才生成外挂字幕。"

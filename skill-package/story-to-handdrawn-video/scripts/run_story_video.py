@@ -7,6 +7,8 @@ import os
 import runpy
 from pathlib import Path
 
+SCRIPT_INTERFACE = "internal-module"
+
 
 def find_project() -> Path:
     configured = os.environ.get("STORY_VIDEO_PROJECT")

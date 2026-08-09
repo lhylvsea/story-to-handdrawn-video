@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Custom character IP references through `--character-reference` and registered
+  `haiyangge` / 海洋哥 profile support; uploaded prototypes are carried into
+  Codex Image2 scene jobs and change the generated asset fingerprint.
+- Article-content review gate with source-to-draft Markdown reports, unified
+  diffs, SHA-256 manifests, explicit approval records, and pre-generation
+  approval checks.
+- `review`, `approve`, and `check` modes in `scripts/run_story_video.py` plus
+  the reusable `scripts/review-story.mjs` command.
+
+### Changed
+
+- Keep article-derived video copy in a human-reviewable state before image
+  generation, narration, or final rendering.
+- Use the Windows `npm.cmd` and `node.exe` entry points from the Python wrapper
+  when running on Windows.
+
 ## [1.1.0] - 2026-08-08
 
 ### Added
@@ -40,6 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with `STORY_VIDEO_PROJECT` discovery and upward directory walk.
 - Example story, style references, and the Ma Shan Zheng font (OFL).
 
-[Unreleased]: https://github.com/gnipbao/story-to-handdrawn-video/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/gnipbao/story-to-handdrawn-video/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/gnipbao/story-to-handdrawn-video/releases/tag/v1.0.0
+[Unreleased]: https://github.com/lhylvsea/any-to-handdrawn-video/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/lhylvsea/any-to-handdrawn-video/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/lhylvsea/any-to-handdrawn-video/releases/tag/v1.0.0
