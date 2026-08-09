@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Article-content review gate with source-to-draft Markdown reports, unified
+  diffs, SHA-256 manifests, explicit approval records, and pre-generation
+  approval checks.
+- `review`, `approve`, and `check` modes in `scripts/run_story_video.py` plus
+  the reusable `scripts/review-story.mjs` command.
+
+### Changed
+
+- Keep article-derived video copy in a human-reviewable state before image
+  generation, narration, or final rendering.
+- Use the Windows `npm.cmd` and `node.exe` entry points from the Python wrapper
+  when running on Windows.
+
 ## [1.1.0] - 2026-08-08
 
 ### Added

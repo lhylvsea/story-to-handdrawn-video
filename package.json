@@ -16,6 +16,7 @@
     "build": "remotion bundle src/index.ts build",
     "package:share": "npm run check && node scripts/package-project.mjs",
     "story": "node scripts/story-to-video.mjs",
+    "review": "node scripts/review-story.mjs",
     "styles": "node scripts/list-handdrawn-styles.mjs",
     "import:codex": "node scripts/import-codex-images.mjs",
     "import:uploaded": "node scripts/import-uploaded-pages.mjs",

@@ -112,6 +112,34 @@ export STORY_VIDEO_PROJECT=/absolute/path/to/story-to-handdrawn-video
 - 默认使用 Codex Image2 生成图片;只有明确要求时才会走 OpenAI API(需 `OPENAI_API_KEY`)。
 - 输出是静音画面轨,配音和 BGM 属于后期工作。
 
+### 文章内容先审阅,再合成
+
+对于来源于文章链接的内容,先保存原文快照和视频文案草稿,再运行审阅模式。Skill 会生成 Markdown 审阅报告、统一格式 diff 和带 SHA-256 的审核清单;在用户确认前,不要生成插画、配音或成片。
+
+```bash
+python3 scripts/run_story_video.py \
+  --mode review \
+  --source /absolute/article-source.txt \
+  --input /absolute/story-draft.txt \
+  --review-dir /absolute/story-review
+```
+
+查看 `story-review.md` 和 `story-review.diff` 后,用户可以直接修改 `story-draft.txt`,再重新运行审阅。确认当前版本后执行:
+
+```bash
+python3 scripts/run_story_video.py \
+  --mode approve \
+  --input /absolute/story-draft.txt \
+  --review-manifest /absolute/story-review/story-review.json
+
+python3 scripts/run_story_video.py \
+  --mode generate \
+  --input /absolute/story-draft.txt \
+  --approved-review /absolute/story-review/story-review.approval.json
+```
+
+如果草稿在审核后发生变化,旧审核记录会因 SHA-256 不匹配而失效,必须重新生成 diff 并确认。该 diff 用于辅助核对删减、改写和新增推断,不能替代事实核验。
+
 ### 20 种内置手绘风格
 
 所有示例使用同一组人物、动作和构图生成,便于直接比较画材、线条、色板与完成度。示例图只作为**风格证据**,生成故事时仍由原文和角色锁定控制人物、场景与动作。
@@ -287,6 +315,34 @@ Preview first (720×960, before committing to a full render):
 ```
 
 Notes: one complete sentence per beat by default; Codex Image2 is the default image generator (the OpenAI API path is only used when explicitly requested and requires `OPENAI_API_KEY`); output is a silent picture track — voiceover and BGM are post-production.
+
+### Review article-derived copy before generation
+
+For article URLs and other source material, save a raw source snapshot and a proposed video-copy draft separately. Run review mode before generating images, narration, or a final render:
+
+```bash
+python3 scripts/run_story_video.py \
+  --mode review \
+  --source /absolute/article-source.txt \
+  --input /absolute/story-draft.txt \
+  --review-dir /absolute/story-review
+```
+
+Inspect `story-review.md` and `story-review.diff`, edit the draft if needed, and recreate the review after every edit. Once the user confirms the current wording, create an approval record and pass it to generation:
+
+```bash
+python3 scripts/run_story_video.py \
+  --mode approve \
+  --input /absolute/story-draft.txt \
+  --review-manifest /absolute/story-review/story-review.json
+
+python3 scripts/run_story_video.py \
+  --mode generate \
+  --input /absolute/story-draft.txt \
+  --approved-review /absolute/story-review/story-review.approval.json
+```
+
+Editing the draft after approval invalidates the old approval through its SHA-256 check. The diff helps review compression, rewrites, and added inference; it does not replace factual checking.
 
 ### Built-in style library
 
