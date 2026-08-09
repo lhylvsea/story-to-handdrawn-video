@@ -1,0 +1,32 @@
+interface:
+  display_name: "故事转手绘动画"
+  short_description: "把中文故事和角色 IP 做成手绘视频，并默认输出 1.2 倍速无字幕配音版"
+  default_prompt: "使用 $story-to-handdrawn-video 制作手绘视频；文章内容先提炼并输出可审阅 diff，用户上传角色原型时按原图锁定 IP，提到海洋哥时使用海洋哥 profile。用户要求配音版时，默认同步加速约 1.2 倍并输出不含底部字幕流的 MP4，只有明确要求时才生成外挂字幕。"
+  examples:
+    - "把这段中文故事做成彩铅日记漫画，先给我分镜。"
+    - "用我上传的角色原型做 IP，制作 3:4 手绘视频。"
+    - "以海洋哥 IP 做成配音版成片，默认不要底部字幕，语速约 1.2 倍。"
+    - "文章先输出原文到视频文案的 diff，确认后再生成画面。"
+
+compatibility:
+  canonical_format: "agent-skills"
+  adapter_targets:
+    - "openai"
+    - "claude"
+    - "generic"
+    - "agent-skills-compatible"
+    - "vscode"
+  dependency_mode: "local-first"
+  notes: "渲染需要 Node.js/npm；配音后期需要 edge-tts、FFmpeg 和 FFprobe；Codex Image2 或明确授权的 API 仅用于画面生成。"
+
+trust:
+  filesystem: "读取用户明确提供的文案、图片和工程文件，并写入项目输出目录"
+  network: "仅在用户要求检索文章或使用远程 TTS/图片服务时启用"
+  secrets: "不得把 API key、Cookie、Token、私有路径或用户原型图写入公开仓库"
+  remote_code: "不执行未经审查的远程脚本"
+
+degradation:
+  missing_ffmpeg: "停止并报告 FFmpeg/FFprobe 安装或路径问题"
+  missing_voice: "保留分镜和静音画面轨，明确标记配音待补，不声称已完成配音"
+  missing_character_reference: "海洋哥 IP 没有用户原型图时停止角色生成并请求上传原型"
+  article_review_unapproved: "只输出审阅 diff，不生成插画、配音或最终视频"

@@ -1,0 +1,25 @@
+{
+  "evidence_kind": "recorded_fixture",
+  "ok": true,
+  "scope": "local integration smoke",
+  "fixture": "user-generated storyboard plus an existing silent H.264 picture track; fixture files are not shipped",
+  "defaults": {
+    "speed": 1.2,
+    "subtitle_mode": "none"
+  },
+  "observations": {
+    "source_timeline_duration_sec": 184.0,
+    "final_duration_sec": 153.318417,
+    "video_resolution": "1080x1440",
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "subtitle_stream_count": 0,
+    "blackdetect": "no black intervals",
+    "audio_peak_db": -5.1
+  },
+  "missing_evidence": [
+    "provider-backed narration quality evidence",
+    "independent human blind review",
+    "clean install from the remote target revision"
+  ]
+}

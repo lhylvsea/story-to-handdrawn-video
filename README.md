@@ -27,6 +27,7 @@
 - Codex Image2 工作流,以及显式选择的 OpenAI API 工作流
 - 20 种内置手绘风格,支持编号、英文 id、中文名和别名选择
 - 每种风格附带固定示例图,并提供统一场景的风格总览
+- 配音版默认同步加速约 1.2 倍,MP4 默认不携带底部字幕流或外挂 SRT
 
 ### 环境要求
 
@@ -110,7 +111,21 @@ export STORY_VIDEO_PROJECT=/absolute/path/to/any-to-handdrawn-video
 - 故事文本默认一个完整句子一个节拍;想控制节奏,直接在故事里按句分行即可。
 - 遇到时间跳跃、指代不明、医疗场景或年龄敏感角色时,建议先让 Agent 给出视觉规划(两位场景编号为键的 JSON),确认后再生成。
 - 默认使用 Codex Image2 生成图片;只有明确要求时才会走 OpenAI API(需 `OPENAI_API_KEY`)。
-- 输出是静音画面轨,配音和 BGM 属于后期工作。
+- 基础渲染输出静音画面轨;用户要求“配音版成片”时,使用仓库内后期脚本默认生成约 1.2 倍速、无字幕流 MP4 和独立配音。
+- 默认不生成 SRT/VTT;只有用户明确要求字幕时才生成外挂字幕。
+
+### 配音版成片
+
+基础画面渲染完成后,执行:
+
+```bash
+python3 scripts/postprocess_voiceover.py \
+  --storyboard /absolute/storyboard.json \
+  --video /absolute/out/picture_silent.mp4 \
+  --output /absolute/out/picture_voiceover.mp4
+```
+
+默认参数为 `--speed 1.2 --subtitle-mode none`;脚本只映射视频和音频,不会继承或烧录字幕流。配音会另存为 `.m4a`,并保留 JSON manifest 与逐镜头音频片段。需要外挂字幕时才追加 `--subtitle-mode srt`。
 
 ### 文章内容先审阅,再合成
 
@@ -215,9 +230,10 @@ python3 scripts/run_story_video.py \
 | 故事文本 | 预览 | `out/picture_silent-preview.mp4` |
 | 上传图片 | 正式 | `out/uploaded_picture_silent.mp4` |
 | 上传图片 | 预览 | `out/uploaded_picture_silent-preview.mp4` |
+| 故事文本配音版 | 后期合成 | `out/picture_voiceover.mp4` + `.m4a` |
 
 - 分辨率:正式 1080×1440,预览 720×960
-- 编码:H.264,静音
+- 基础编码:H.264,静音;配音版为 H.264 + AAC,默认 1.2 倍速且无字幕流
 
 Skill 的完整行为约定见 [skill-package/story-to-handdrawn-video/SKILL.md](skill-package/story-to-handdrawn-video/SKILL.md)。
 
@@ -264,7 +280,7 @@ This repo contains:
 ### Requirements
 
 - Node.js 20+, Python 3.10+, npm
-- FFmpeg (`ffmpeg` and `ffprobe` on PATH)
+- FFmpeg (`ffmpeg` and `ffprobe` on PATH); `edge-tts` when a generated voiceover is requested
 - Google Chrome or a Remotion-managed compatible browser
 - An agent runtime with skill support (Codex, Claude Code, Kimi Code, …)
 
@@ -330,7 +346,20 @@ Preview first (720×960, before committing to a full render):
 使用 $story-to-handdrawn-video 先给这个故事生成一个预览版。
 ```
 
-Notes: one complete sentence per beat by default; Codex Image2 is the default image generator (the OpenAI API path is only used when explicitly requested and requires `OPENAI_API_KEY`); output is a silent picture track — voiceover and BGM are post-production.
+Notes: one complete sentence per beat by default; Codex Image2 is the default image generator (the OpenAI API path is only used when explicitly requested and requires `OPENAI_API_KEY`); the base output is a silent picture track. When a voiceover cut is requested, the repository postprocessor defaults to synchronized 1.2x playback and an MP4 with no subtitle stream or default SRT.
+
+### Voiceover finalization
+
+After rendering the base picture track, run:
+
+```bash
+python3 scripts/postprocess_voiceover.py \
+  --storyboard /absolute/storyboard.json \
+  --video /absolute/out/picture_silent.mp4 \
+  --output /absolute/out/picture_voiceover.mp4
+```
+
+The default is `--speed 1.2 --subtitle-mode none`. It writes a standalone `.m4a`, a JSON runtime manifest, and per-scene audio segments. Add `--subtitle-mode srt` only when the user explicitly requests an external subtitle file; subtitles are never burned or muxed by default.
 
 ### Review article-derived copy before generation
 
@@ -431,8 +460,9 @@ The machine-readable recipes live in [references/handdrawn-style-library.json](r
 | Story text | preview | `out/picture_silent-preview.mp4` |
 | Uploaded images | final | `out/uploaded_picture_silent.mp4` |
 | Uploaded images | preview | `out/uploaded_picture_silent-preview.mp4` |
+| Story text voiceover | post-production | `out/picture_voiceover.mp4` + `.m4a` |
 
-Final 1080×1440, preview 720×960, H.264, silent. The full behavior contract lives in [SKILL.md](skill-package/story-to-handdrawn-video/SKILL.md).
+Final 1080×1440, preview 720×960. The base output is silent H.264; the optional default voiceover cut is H.264 + AAC at synchronized 1.2x with no subtitle stream. The full behavior contract lives in [SKILL.md](skill-package/story-to-handdrawn-video/SKILL.md).
 
 ### License
 
