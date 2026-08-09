@@ -1,4 +1,4 @@
-# story-to-handdrawn-video
+# any-to-handdrawn-video
 
 [中文](#中文) | [English](#english)
 
@@ -42,8 +42,8 @@
 1. 准备渲染器项目:
 
 ```bash
-git clone https://github.com/gnipbao/story-to-handdrawn-video.git
-cd story-to-handdrawn-video
+git clone https://github.com/lhylvsea/any-to-handdrawn-video.git
+cd any-to-handdrawn-video
 npm ci
 npm run check      # TypeScript 检查 + 分镜结构校验,不访问网络
 ```
@@ -64,7 +64,7 @@ cp -R skill-package/story-to-handdrawn-video ~/.agents/skills/
 3. 告诉 Skill 渲染器项目在哪里(在渲染器项目目录内运行 Agent 时可省略):
 
 ```bash
-export STORY_VIDEO_PROJECT=/absolute/path/to/story-to-handdrawn-video
+export STORY_VIDEO_PROJECT=/absolute/path/to/any-to-handdrawn-video
 ```
 
 ### 使用方法(Codex Skill 示例)
@@ -273,8 +273,8 @@ This repo contains:
 1. Set up the renderer project:
 
 ```bash
-git clone https://github.com/gnipbao/story-to-handdrawn-video.git
-cd story-to-handdrawn-video
+git clone https://github.com/lhylvsea/any-to-handdrawn-video.git
+cd any-to-handdrawn-video
 npm ci
 npm run check
 ```
@@ -295,7 +295,7 @@ cp -R skill-package/story-to-handdrawn-video ~/.agents/skills/
 3. Point the skill at the renderer project (skip when the agent runs inside it):
 
 ```bash
-export STORY_VIDEO_PROJECT=/absolute/path/to/story-to-handdrawn-video
+export STORY_VIDEO_PROJECT=/absolute/path/to/any-to-handdrawn-video
 ```
 
 ### Usage (Codex skill examples)
