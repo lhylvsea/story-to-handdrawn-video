@@ -140,6 +140,22 @@ python3 scripts/run_story_video.py \
 
 如果草稿在审核后发生变化,旧审核记录会因 SHA-256 不匹配而失效,必须重新生成 diff 并确认。该 diff 用于辅助核对删减、改写和新增推断,不能替代事实核验。
 
+### 自定义角色 IP
+
+如果用户上传了角色原型图并要求“以这张图为指定 IP”,把图片作为 `--character-reference` 传入。它会被作为身份参考加入每个 Codex Image2 场景任务;背景、临时姿势和无关道具不会被当作角色身份。变更参考图会生成新的资源指纹,不会静默复用旧人物素材。
+
+“海洋哥”或“海洋叔叔”使用内置 `haiyangge` profile,但必须同时提供用户上传的原型图:
+
+```bash
+python3 scripts/run_story_video.py \
+  --input /absolute/story.txt \
+  --character-profile haiyangge \
+  --character-reference /absolute/uploaded-character-prototype.png \
+  --mode generate
+```
+
+该 profile 会启用固定 IP 文案;若文字与原型图可见细节冲突,以用户上传的原型图为准。当前图片只从用户本地路径读取,不会复制进公开仓库。其他角色可以组合 `--character-reference` 与 `--character-lock` 使用。
+
 ### 20 种内置手绘风格
 
 所有示例使用同一组人物、动作和构图生成,便于直接比较画材、线条、色板与完成度。示例图只作为**风格证据**,生成故事时仍由原文和角色锁定控制人物、场景与动作。
@@ -343,6 +359,22 @@ python3 scripts/run_story_video.py \
 ```
 
 Editing the draft after approval invalidates the old approval through its SHA-256 check. The diff helps review compression, rewrites, and added inference; it does not replace factual checking.
+
+### Custom character IP
+
+When the user uploads a character prototype and asks to use it as the named IP, pass the local image with `--character-reference`. It is included as an identity reference in every Codex Image2 scene job; unrelated background, temporary pose, and incidental props are not treated as identity. Changing the image changes the asset fingerprint, so stale character assets are not silently reused.
+
+For the named “海洋哥” / “海洋叔叔” IP, use the registered `haiyangge` profile together with the uploaded prototype:
+
+```bash
+python3 scripts/run_story_video.py \
+  --input /absolute/story.txt \
+  --character-profile haiyangge \
+  --character-reference /absolute/uploaded-character-prototype.png \
+  --mode generate
+```
+
+The profile applies the fixed character lock; if written details conflict with the visible prototype, the uploaded prototype wins. The image is read from the user's local path and is not copied into the public repository. Other custom characters can combine `--character-reference` with `--character-lock`.
 
 ### Built-in style library
 

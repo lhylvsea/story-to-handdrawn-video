@@ -1,4 +1,4 @@
 interface:
   display_name: "故事转手绘动画"
-  short_description: "文章先提炼并输出 diff，确认后再生成手绘动画"
-  default_prompt: "使用 $story-to-handdrawn-video 先提炼文章内容并输出可审阅 diff，确认后再生成手绘动画。"
+  short_description: "支持文章 diff 审阅和自定义角色 IP 参考图"
+  default_prompt: "使用 $story-to-handdrawn-video；文章内容先提炼并输出可审阅 diff，用户上传角色原型时按原图锁定 IP，提到海洋哥时使用海洋哥 profile，确认后再生成手绘动画。"

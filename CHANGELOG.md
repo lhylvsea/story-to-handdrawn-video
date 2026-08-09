@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Custom character IP references through `--character-reference` and registered
+  `haiyangge` / 海洋哥 profile support; uploaded prototypes are carried into
+  Codex Image2 scene jobs and change the generated asset fingerprint.
 - Article-content review gate with source-to-draft Markdown reports, unified
   diffs, SHA-256 manifests, explicit approval records, and pre-generation
   approval checks.

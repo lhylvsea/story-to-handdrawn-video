@@ -49,6 +49,15 @@ def parse_args() -> argparse.Namespace:
         help="Print the built-in style catalog and exit",
     )
     parser.add_argument("--character-lock")
+    parser.add_argument(
+        "--character-profile",
+        help="Registered character IP profile, such as haiyangge",
+    )
+    parser.add_argument(
+        "--character-reference",
+        type=Path,
+        help="User-uploaded character prototype image used as an identity reference",
+    )
     parser.add_argument("--visual-plan", type=Path)
     parser.add_argument(
         "--source",
@@ -266,6 +275,13 @@ def main() -> None:
     ]
     if args.character_lock:
         command += ["--character-lock", args.character_lock]
+    if args.character_profile:
+        command += ["--character-profile", args.character_profile]
+    if args.character_reference:
+        command += [
+            "--character-reference",
+            str(resolve_project_path(args.character_reference, project)),
+        ]
     if args.visual_plan:
         command += ["--visual-plan", str(args.visual_plan.expanduser().resolve())]
     if args.manifest:
